@@ -1,4 +1,7 @@
 import os
+
+import pandas as pd
+
 from log import log
 from dl import MeowDataLoader
 from feat import FeatureGenerator
@@ -24,7 +27,17 @@ class MeowEngine(object):
     def fit(self, startDate, endDate):
         dates = self.calendar.range(startDate, endDate)
         rawData = self.dloader.loadDates(dates)
+        # grouped = rawData.groupby("symbol")
+        # features_list = []
+        # tar_list = []
         log.inf("Running model fitting...")
+        # for symbol, group in grouped:
+        #     features, tars = self.featGenerator.genFeatures(group)
+        #     features_list.append(features)
+        #     tar_list.append(tars)
+        # xdf = pd.concat(features_list)
+        # ydf = pd.concat(tar_list)
+
         xdf, ydf = self.featGenerator.genFeatures(rawData)
         self.model.fit(xdf, ydf)
 
@@ -42,5 +55,6 @@ class MeowEngine(object):
 
 if __name__ == "__main__":
     engine = MeowEngine(h5dir="../archive", cacheDir=None)
+    # engine.fit(20230601, 20230602)
     engine.fit(20230601, 20231130)
     engine.eval(20231201, 20231229)

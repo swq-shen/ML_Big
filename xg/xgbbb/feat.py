@@ -35,7 +35,9 @@ class FeatureGenerator(object):  # 定义MeowFeatureGenerator类
             'price_movement',
             'bid_ask_mid_spread',
             'turnover_rate',
-            
+            'k_mid',
+            # 'k_up',
+            'k_sft'
 
 
         ]
@@ -100,6 +102,18 @@ class FeatureGenerator(object):  # 定义MeowFeatureGenerator类
         df['bid_ask_mid_spread'] = (df['ask0'] + df['bid0']) / 2 - df['midpx']#kykw
         # 成交额转换率
         df['turnover_rate'] = df['tradeBuyTurnover'].div(df['tradeBuyQty'])
+
+        df['k_mid'] = (df['lastpx'] - df['open']) / df['open']
+
+        # df['k_up'] = (df['high'] - max(df['open'], df['lastpx'])) / df['open']
+
+        df['k_sft'] = (2 * df['lastpx'] - df['high'] - df['low']) / df['open']
+
+        # # 加权平均价格
+        # df['weighted_average_price0'] = (df['bid0'] * df['asize0'] + df['ask0'] * df['bid0']) / (df['bsize0'] + df['asize0'])
+        # # 收益率
+        # df['profit_rate'] = (df['lastpx'] - df['open']) / df['open']
+
 
         # 将特征和目标列设置为DataFrame的索引，并填充缺失值
         xdf = df[self.mcols + self.featureNames()].set_index(self.mcols).fillna(0)

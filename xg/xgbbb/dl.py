@@ -26,6 +26,9 @@ class MeowDataLoader(object):
         df.loc[:, "date"] = date
         precols = ["symbol", "interval", "date"]
         df = df[precols + [x for x in df.columns if x not in precols]] # re-arrange columns
+        # grouped = df.groupby("symbol")
+        # print(df)
+        # print(grouped.get_group(90301419))
         return df
 
     def deal(self, df):
