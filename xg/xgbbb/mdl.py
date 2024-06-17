@@ -2,6 +2,14 @@ import os
 import xgboost as xgb
 from log import log
 
+parameters = {
+    'n_estimators': [100, 200, 300, 400],
+    'learning_rate': [0.001, 0.005, 0.01, 0.05],
+    'max_depth': [8, 10, 12, 15],
+    'gamma': [0.001, 0.005, 0.01, 0.02],
+    'random_state': [42]
+}
+
 class MeowModel(object):
     def __init__(self, cacheDir):
         # 初始化XGBoost的模型

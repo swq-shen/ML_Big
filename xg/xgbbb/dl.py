@@ -15,6 +15,7 @@ class MeowDataLoader(object):
             raise ValueError("Dates empty")
         log.inf("Loading data of {} dates from {} to {}...".format(len(dates), min(dates), max(dates)))
         df = pd.concat(self.loadDate(x) for x in dates)
+        # print(df)
         return self.deal(df)
         #return df
 

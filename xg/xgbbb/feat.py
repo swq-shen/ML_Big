@@ -36,8 +36,10 @@ class FeatureGenerator(object):  # 定义MeowFeatureGenerator类
             'bid_ask_mid_spread',
             'turnover_rate',
             'k_mid',
-            # 'k_up',
-            'k_sft'
+            'k_sft',
+            'buyVwad',
+            'price_grad4',
+            'price_grad19'
 
 
         ]
@@ -109,10 +111,9 @@ class FeatureGenerator(object):  # 定义MeowFeatureGenerator类
 
         df['k_sft'] = (2 * df['lastpx'] - df['high'] - df['low']) / df['open']
 
-        # # 加权平均价格
-        # df['weighted_average_price0'] = (df['bid0'] * df['asize0'] + df['ask0'] * df['bid0']) / (df['bsize0'] + df['asize0'])
-        # # 收益率
-        # df['profit_rate'] = (df['lastpx'] - df['open']) / df['open']
+        df['price_grad4'] = (df['ask4'] - df['bid4']) / 4
+        df['price_grad9'] = (df['ask9'] - df['bid9']) / 9
+        df['price_grad19'] = (df['ask19'] - df['bid19']) / 19
 
 
         # 将特征和目标列设置为DataFrame的索引，并填充缺失值
@@ -120,6 +121,19 @@ class FeatureGenerator(object):  # 定义MeowFeatureGenerator类
         ydf = df[self.mcols + [self.ycol]].set_index(self.mcols).fillna(0)
         return xdf, ydf  # 返回特征DataFrame和目标DataFrame
 
+    def relative_strength_idx(self, df, n=14):
+        close = df['lastpx']
+        delta = close.diff()
+        delta = delta[1:]
+        pricesUp = delta.copy()
+        pricesDown = delta.copy()
+        pricesUp[pricesUp < 0] = 0
+        pricesDown[pricesDown > 0] = 0
+        rollUp = pricesUp.rolling(n).mean()
+        rollDown = pricesDown.abs().rolling(n).mean()
+        rs = rollUp / rollDown
+        rsi = 100.0 - (100.0 / (1.0 + rs))
+        return rsi
 
     def plot_correlation_heatmap(self, df):
         # 计算特征列之间的相关系数矩阵

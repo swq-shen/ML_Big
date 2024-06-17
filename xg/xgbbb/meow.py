@@ -35,6 +35,7 @@ class MeowEngine(object):
         #     features, tars = self.featGenerator.genFeatures(group)
         #     features_list.append(features)
         #     tar_list.append(tars)
+        #     self.model.fit(features, tars)
         # xdf = pd.concat(features_list)
         # ydf = pd.concat(tar_list)
 
