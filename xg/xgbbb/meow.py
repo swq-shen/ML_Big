@@ -8,6 +8,9 @@ from feat import FeatureGenerator
 from mdl import MeowModel
 from eval import MeowEvaluator
 from tradingcalendar import Calendar
+import warnings
+
+warnings.filterwarnings("ignore")
 
 
 class MeowEngine(object):
@@ -27,19 +30,19 @@ class MeowEngine(object):
     def fit(self, startDate, endDate):
         dates = self.calendar.range(startDate, endDate)
         rawData = self.dloader.loadDates(dates)
-        # grouped = rawData.groupby("symbol")
-        # features_list = []
-        # tar_list = []
         log.inf("Running model fitting...")
-        # for symbol, group in grouped:
-        #     features, tars = self.featGenerator.genFeatures(group)
-        #     features_list.append(features)
-        #     tar_list.append(tars)
-        #     self.model.fit(features, tars)
-        # xdf = pd.concat(features_list)
-        # ydf = pd.concat(tar_list)
-
         xdf, ydf = self.featGenerator.genFeatures(rawData)
+        # 以下为先提取特征再groupby的过程，效果不佳
+        # grouped_x = xdf.groupby("symbol")
+        # grouped_y = ydf.groupby("symbol")
+        # x_list = []
+        # y_list = []
+        # for symbol, group in grouped_x:
+        #     x_list.append(group)
+        # for symbol, group in grouped_y:
+        #     y_list.append(group)
+        # for i in range(0, len(x_list) - 1):
+        #     self.model.fit(x_list[i], y_list[i])
         self.model.fit(xdf, ydf)
 
     def predict(self, xdf):

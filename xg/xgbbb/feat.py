@@ -39,7 +39,12 @@ class FeatureGenerator(object):  # 定义MeowFeatureGenerator类
             'k_sft',
             'buyVwad',
             'price_grad4',
-            'price_grad19'
+            'price_grad19',
+            'stock_tag',
+            'RSI',
+            # 'MACD'
+            # 'MACD_signal'
+
 
 
         ]
@@ -115,6 +120,14 @@ class FeatureGenerator(object):  # 定义MeowFeatureGenerator类
         df['price_grad9'] = (df['ask9'] - df['bid9']) / 9
         df['price_grad19'] = (df['ask19'] - df['bid19']) / 19
 
+        df['stock_tag'] = df['symbol']
+
+        df['RSI'] = self.relative_strength_idx(df).fillna(0)
+
+        # EMA_12 = pd.Series(df['lastpx'].ewm(span=12, min_periods=12).mean())
+        # EMA_26 = pd.Series(df['lastpx'].ewm(span=26, min_periods=26).mean())
+        # df['MACD'] = pd.Series(EMA_12 - EMA_26)
+        # df['MACD_signal'] = pd.Series(df.MACD.ewm(span=9, min_periods=9).mean())
 
         # 将特征和目标列设置为DataFrame的索引，并填充缺失值
         xdf = df[self.mcols + self.featureNames()].set_index(self.mcols).fillna(0)
