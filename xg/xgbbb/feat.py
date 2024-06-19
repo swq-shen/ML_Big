@@ -37,11 +37,13 @@ class FeatureGenerator(object):  # 定义MeowFeatureGenerator类
             'turnover_rate',
             'k_mid',
             'k_sft',
+            'k_up',
+            'k_low',
             'buyVwad',
             'price_grad4',
             'price_grad19',
-            'stock_tag',
-            'RSI',
+            'stock_tag'
+            # 'RSI'
             # 'MACD'
             # 'MACD_signal'
 
@@ -111,10 +113,13 @@ class FeatureGenerator(object):  # 定义MeowFeatureGenerator类
         df['turnover_rate'] = df['tradeBuyTurnover'].div(df['tradeBuyQty'])
 
         df['k_mid'] = (df['lastpx'] - df['open']) / df['open']
+        df['k_mid2'] = (df['lastpx'] - df['open']) / (df['high'] - df['low'])
 
-        # df['k_up'] = (df['high'] - max(df['open'], df['lastpx'])) / df['open']
+        df['k_up'] = (df['high'] - df[['open', 'lastpx']].max(axis=1)) / df['open']
+        df['k_low'] = (df[['open', 'lastpx']].min(axis=1) - df['low']) / df['open']
 
         df['k_sft'] = (2 * df['lastpx'] - df['high'] - df['low']) / df['open']
+        df['k_sft2'] = (2 * df['lastpx'] - df['high'] - df['low']) / (df['high'] - df['low'])
 
         df['price_grad4'] = (df['ask4'] - df['bid4']) / 4
         df['price_grad9'] = (df['ask9'] - df['bid9']) / 9
