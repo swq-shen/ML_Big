@@ -15,7 +15,6 @@ class MeowDataLoader(object):
             raise ValueError("Dates empty")
         log.inf("Loading data of {} dates from {} to {}...".format(len(dates), min(dates), max(dates)))
         df = pd.concat(self.loadDate(x) for x in dates)
-        # print(df)
         return self.deal(df)
         #return df
 
@@ -28,8 +27,6 @@ class MeowDataLoader(object):
         precols = ["symbol", "interval", "date"]
         df = df[precols + [x for x in df.columns if x not in precols]] # re-arrange columns
         # grouped = df.groupby("symbol")
-        # print(df)
-        # print(grouped.get_group(90301419))
         return df
 
     def deal(self, df):

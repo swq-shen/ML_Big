@@ -41,7 +41,16 @@ class FeatureGenerator(object):  # 定义MeowFeatureGenerator类
             'k_low',
             'buyVwad',
             'price_grad4',
-            'price_grad19',
+            'price_grad19','nTradeSell', 'tradeSellQty', 'tradeSellTurnover', 'tradeSellHigh',
+       'tradeSellLow', 'sellVwad', 'nAddBuy', 'addBuyQty', 'addBuyTurnover',
+       'addBuyHigh', 'addBuyLow', 'nAddSell', 'addSellQty', 'addSellTurnover',
+       'addSellHigh', 'addSellLow', 'nCxlBuy', 'cxlBuyQty', 'cxlBuyTurnover',
+       'cxlBuyHigh', 'cxlBuyLow', 'nCxlSell', 'cxlSellQty', 'cxlSellTurnover',
+       'cxlSellHigh', 'cxlSellLow',
+            # 'SMA_5',
+            # 'SMA_8',
+            # 'SMA_13',
+            # 'AO',
             'stock_tag'
             # 'log_return_ask0',
             # 'log_return_ask4',
@@ -151,6 +160,16 @@ class FeatureGenerator(object):  # 定义MeowFeatureGenerator类
         EMA_26 = pd.Series(df['lastpx'].ewm(span=26, min_periods=26).mean())
         df['MACD'] = pd.Series(EMA_12 - EMA_26)
         df['MACD_signal'] = pd.Series(df.MACD.ewm(span=9, min_periods=9).mean())
+
+        df['SMA_5'] = ((df['high'] + df['low']) / 2).rolling(5).mean().shift()
+        df['SMA_8'] = ((df['high'] + df['low']) / 2).rolling(8).mean().shift()
+        df['SMA_13'] = ((df['high'] + df['low']) / 2).rolling(8).mean().shift()
+
+        df['AO'] = ((df['high'] + df['low']) / 2).rolling(5).mean().shift() - ((df['high'] + df['low']) / 2).rolling(34).mean().shift()
+
+        df['mid_price0_4'] = (df['atr0_4'] + df['btr0_4']) / (df['asize0_4'] + df['bsize0_4'])
+        df['mid_price5_9'] = (df['atr5_9'] + df['btr5_9']) / (df['asize5_9'] + df['bsize5_9'])
+        df['mid_price10_19'] = (df['atr10_19'] + df['btr10_19']) / (df['asize10_19'] + df['bsize10_19'])
 
         # 将特征和目标列设置为DataFrame的索引，并填充缺失值
         xdf = df[self.mcols + self.featureNames()].set_index(self.mcols).fillna(0)
