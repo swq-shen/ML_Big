@@ -43,8 +43,16 @@ class FeatureGenerator(object):  # 定义MeowFeatureGenerator类
             'price_grad4',
             'price_grad19',
             'stock_tag'
-            # 'RSI'
-            # 'MACD'
+            # 'log_return_ask0',
+            # 'log_return_ask4',
+            # 'log_return_ask9',
+            # 'log_return_ask19',
+            # 'log_return_bid0',
+            # 'log_return_bid4',
+            # 'log_return_bid9',
+            # 'log_return_bid19',
+            # 'RSI',
+            # 'MACD',
             # 'MACD_signal'
 
 
@@ -129,10 +137,20 @@ class FeatureGenerator(object):  # 定义MeowFeatureGenerator类
 
         df['RSI'] = self.relative_strength_idx(df).fillna(0)
 
-        # EMA_12 = pd.Series(df['lastpx'].ewm(span=12, min_periods=12).mean())
-        # EMA_26 = pd.Series(df['lastpx'].ewm(span=26, min_periods=26).mean())
-        # df['MACD'] = pd.Series(EMA_12 - EMA_26)
-        # df['MACD_signal'] = pd.Series(df.MACD.ewm(span=9, min_periods=9).mean())
+        df['log_return_ask0'] = np.log((df['ask0'] - df['ask0'].shift(1)) / df['ask0'].shift(1) + 1)
+        df['log_return_ask4'] = np.log((df['ask4'] - df['ask4'].shift(1)) / df['ask4'].shift(1) + 1)
+        df['log_return_ask9'] = np.log((df['ask9'] - df['ask9'].shift(1)) / df['ask9'].shift(1) + 1)
+        df['log_return_ask19'] = np.log((df['ask19'] - df['ask19'].shift(1)) / df['ask19'].shift(1) + 1)
+
+        df['log_return_bid0'] = np.log((df['bid0'] - df['bid0'].shift(1)) / df['bid0'].shift(1) + 1)
+        df['log_return_bid4'] = np.log((df['bid4'] - df['bid4'].shift(1)) / df['bid4'].shift(1) + 1)
+        df['log_return_bid9'] = np.log((df['bid9'] - df['bid9'].shift(1)) / df['bid9'].shift(1) + 1)
+        df['log_return_bid19'] = np.log((df['bid19'] - df['bid19'].shift(1)) / df['bid19'].shift(1) + 1)
+
+        EMA_12 = pd.Series(df['lastpx'].ewm(span=12, min_periods=12).mean())
+        EMA_26 = pd.Series(df['lastpx'].ewm(span=26, min_periods=26).mean())
+        df['MACD'] = pd.Series(EMA_12 - EMA_26)
+        df['MACD_signal'] = pd.Series(df.MACD.ewm(span=9, min_periods=9).mean())
 
         # 将特征和目标列设置为DataFrame的索引，并填充缺失值
         xdf = df[self.mcols + self.featureNames()].set_index(self.mcols).fillna(0)
