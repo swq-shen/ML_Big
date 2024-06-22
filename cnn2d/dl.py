@@ -5,10 +5,11 @@ from log import log
 
 
 class DataLoader(object):
-    def __init__(self, h5dir):
+    def __init__(self, h5dir, stock):
         self.h5dir = h5dir
         self.calendar = Calendar()
         self.threshold = 2
+        self.stock = stock
 
     def loadDates(self, dates):
         if len(dates) == 0:
@@ -16,7 +17,6 @@ class DataLoader(object):
         log.inf("Loading data of {} dates from {} to {}...".format(len(dates), min(dates), max(dates)))
         df = pd.concat(self.loadDate(x) for x in dates)
         df = self.deal(df)
-
         return df
 
     def loadDate(self, date):
@@ -25,38 +25,69 @@ class DataLoader(object):
         h5File = os.path.join(self.h5dir, "{}.h5".format(date))
         df = pd.read_hdf(h5File)
         df.loc[:, "date"] = date
+        if self.stock != None:
+            df = df[df['symbol'] == self.stock]
         precols = ["symbol", "interval", "date"]
         df = df[precols + [x for x in df.columns if x not in precols]] # re-arrange columns
         return df
 
     def deal(self, df):
-        # 假设df是pandas DataFrame
         nn = [
             'midpx', 'lastpx', 'open',
-       'high', 'low', 'bid0', 'ask0', 'bid4', 'ask4', 'bid9', 'ask9', 'bid19',
-       'ask19', 'bsize0', 'asize0', 'bsize0_4', 'asize0_4', 'bsize5_9',
-       'asize5_9', 'bsize10_19', 'asize10_19', 'btr0_4', 'atr0_4', 'btr5_9',
-       'atr5_9', 'btr10_19', 'atr10_19', 'nTradeBuy', 'tradeBuyQty',
-       'tradeBuyTurnover', 'tradeBuyHigh', 'tradeBuyLow', 'buyVwad',
-       'nTradeSell', 'tradeSellQty', 'tradeSellTurnover', 'tradeSellHigh',
-       'tradeSellLow', 'sellVwad', 'nAddBuy', 'addBuyQty', 'addBuyTurnover',
-       'addBuyHigh', 'addBuyLow', 'nAddSell', 'addSellQty', 'addSellTurnover',
-       'addSellHigh', 'addSellLow', 'nCxlBuy', 'cxlBuyQty', 'cxlBuyTurnover',
-       'cxlBuyHigh', 'cxlBuyLow', 'nCxlSell', 'cxlSellQty', 'cxlSellTurnover',
-       'cxlSellHigh', 'cxlSellLow']
-
-        # 计算所有列的均值和标准差，避免在循环中重复计算
+        'high', 'low', 'bid0', 'ask0', 'bid4', 'ask4', 'bid9', 'ask9', 'bid19',
+        'ask19', 'bsize0', 'asize0', 'bsize0_4', 'asize0_4', 'bsize5_9',
+        'asize5_9', 'bsize10_19', 'asize10_19', 'btr0_4', 'atr0_4', 'btr5_9',
+        'atr5_9', 'btr10_19', 'atr10_19', 'nTradeBuy', 'tradeBuyQty',
+        'tradeBuyTurnover', 'tradeBuyHigh', 'tradeBuyLow', 'buyVwad',
+        'nTradeSell', 'tradeSellQty', 'tradeSellTurnover', 'tradeSellHigh',
+        'tradeSellLow', 'sellVwad', 'nAddBuy', 'addBuyQty', 'addBuyTurnover',
+        'addBuyHigh', 'addBuyLow', 'nAddSell', 'addSellQty', 'addSellTurnover',
+        'addSellHigh', 'addSellLow', 'nCxlBuy', 'cxlBuyQty', 'cxlBuyTurnover',
+        'cxlBuyHigh', 'cxlBuyLow', 'nCxlSell', 'cxlSellQty', 'cxlSellTurnover',
+        'cxlSellHigh', 'cxlSellLow']
         means = df[nn].mean()
         stds = df[nn].std()
-
-        # 一次性计算所有z-scores
         z_scores = (df[nn] - means) / stds
-
-        # 一次性创建离群点的布尔索引
         outlier_mask = (z_scores.abs() > self.threshold).any(axis=1)
-
-        # 使用布尔索引一次性删除所有离群点
         df_cleaned = df[~outlier_mask]
+        df = df_cleaned
+        # for column in nn:
+        #     df.loc[outlier_mask, column] = means[column]
+        # min_max_normalized_df = (df[nn] - df[nn].min() + 1e-10) / (df[nn].max() - df[nn].min() + 1e-10)
+        # df.loc[:, nn] = min_max_normalized_df
+        return df
 
-        return df_cleaned
 
+def sym():
+    symbol = [90002487, 90300473, 90300474, 90300476, 90000957, 90300484, 90301509, 90300450, 90000933, 90000423,
+              90002472, 90300882, 90300458, 90002475, 90002987, 90300972, 90300466,90300467, 90002484, 90000951,
+              90000969, 90300490, 90300491, 90300493, 90300936, 90002955, 90300428, 90002957, 90000400, 90002962,
+              90002453, 90002965, 90300438, 90000921, 90002459, 90002463, 90300447, 90300880, 90002466, 90003022,
+              90300496, 90000977, 90300499, 90002006, 90002518, 90300502, 90300504, 90301018, 90002011, 90000988,
+              90003035, 90002015, 90002527, 90300001, 90002531, 90002020, 90002532, 90000999, 90002535, 90002536,
+              90300007, 90300520, 90301031, 90300525, 90300014, 90300015, 90002544, 90300017, 90301039, 90300532,
+              90300533, 90300534, 90300024, 90300025, 90300538, 90002555, 90301048, 90300542, 90002049, 90002050,
+              90000516, 90300037, 90300548, 90300039, 90300551, 90301060, 90002572, 90300556, 90300558, 90300560,
+              90300049, 90300561, 90300563, 90300054, 90300567, 90002074, 90000539, 90300570, 90300571, 90300062,
+              90000543, 90300576, 90300579, 90002600, 90300585, 90002605, 90300590, 90300592, 90300593, 90002101,
+              90300087, 90300604, 90000063, 90002112, 90002625, 90300095, 90301120, 90000581, 90300101, 90300613,
+              90002123, 90300620, 90002126, 90300112, 90002129, 90300114, 90300115, 90002644, 90300624, 90300118,
+              90300633, 90300122, 90300634, 90300125, 90300638, 90300129, 90000610, 90002150, 90002151, 90000617,
+              90002155, 90002156, 90301165, 90300655, 90000625, 90300660, 90002167, 90300151, 90002681, 90300666,
+              90300672, 90300161, 90300674, 90002179, 90301185, 90300678, 90002184, 90300682, 90300684, 90300685,
+              90002703, 90002192, 90300687, 90300688, 90002709, 90300181, 90000151, 90300693, 90002714, 90300699,
+              90301211, 90000157, 90002213, 90002728, 90002729, 90300713, 90002733, 90002738, 90300211, 90300724,
+              90301236, 90002230, 90002232, 90300217, 90300730, 90002747, 90002236, 90300222, 90300223, 90300226,
+              90300738, 90301252, 90002245, 90002757, 90300231, 90002249, 90300236, 90301260, 90000721, 90301269,
+              90002262, 90300759, 90300763, 90002268, 90002782, 90300768, 90000738, 90002276, 90300260, 90003816,
+              90002281, 90301293, 90300782, 90301297, 90300274, 90300275, 90000756, 90300793, 90301307, 90002812,
+              90301311, 90000768, 90001282, 90300803, 90002821, 90001286, 90001287, 90300298, 90002315, 90301325,
+              90002835, 90300308, 90001301, 90002837, 90301337, 90300827, 90300316, 90300317, 90002334, 90002335,
+              90300830, 90301339, 90002338, 90002340, 90000807, 90002351, 90001328, 90002352, 90002864, 90002865,
+              90300340, 90000821, 90300341, 90300847, 90001337, 90300346, 90001339, 90300347, 90002877, 90002878,
+              90000831, 90300351, 90300353, 90002882, 90000837, 90002885, 90301382, 90300360, 90002380, 90002892,
+              90001360, 90002384, 90000338, 90002896, 90002897, 90002389, 90001366, 90002902, 90002903, 90300373,
+              90002906, 90300378, 90300379, 90301399, 90000862, 90300895, 90002401, 90002913, 90001380, 90002916,
+              90300389, 90002409, 90002410, 90300394, 90300395, 90301419, 90002415, 90300913, 90300404, 90300409,
+              90300922, 90002428, 90300415, 90002436, 90002439]
+    return symbol

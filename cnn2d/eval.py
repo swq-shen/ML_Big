@@ -1,8 +1,6 @@
-import os
 import numpy as np
-import pandas as pd
 from matplotlib import pyplot as plt
-
+import torch
 from log import log
 
 
@@ -22,11 +20,7 @@ class MeowEvaluator(object):
 
 
 def show_(ydf):
-    # 直接在 ydf 上操作，不需要使用 .xs
-    # 替换无穷值并填充NaN为0
     ydf = ydf.replace([np.inf, -np.inf], np.nan).fillna(0)
-
-    # 绘图代码...
     plt.figure(figsize=(10, 5))
     plt.plot(ydf.index, ydf["fret12"], label='Actual', color='blue')
     plt.plot(ydf.index, ydf["forecast"], label='Forecast', color='red')
@@ -36,9 +30,6 @@ def show_(ydf):
     plt.ylabel('Value')
     plt.grid(True)
     plt.show()
-
-
-import torch
 
 
 def pearson_loss(output, target):
@@ -68,13 +59,5 @@ def composite_loss(output, target, alpha=0, beta=0, gamma=1):
     pearson = pearson_loss(output, target)
     r2 = r2_loss(output, target)
     mse = mse_loss(output, target)
-
-    # 标准化损失（可选）
-    # 这里可以添加代码来标准化每个损失值
-
-    # 加权组合损失
-
     return alpha * (1-pearson) + beta * (1-r2) + gamma * mse
-# 使用复合损失函数
-# 在你的模型训练循环中，你可以这样使用它：
-# loss = composite_loss(outputs, batch_y)
+
